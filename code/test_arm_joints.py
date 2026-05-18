@@ -1,6 +1,5 @@
 """
-OpenManipulator-X Joint Test Script
-Moves each joint one at a time so you can see what each one does.
+OpenManipulator-X Joint Test Script, Moves each joint one at a time so you can see what each one does.
 
 Controls:
   - The script cycles through each joint automatically with output in terminal
@@ -19,8 +18,8 @@ import numpy as np
 import time
 
 # Load the model
-model = mujoco.MjModel.from_xml_path("/home/pinaka/robotis_mujoco_menagerie/robotis_open_manipulator_x/scene.xml")
-data = mujoco.MjData(model)
+model = mujoco.MjModel.from_xml_path("/home/pinaka/robotis_mujoco_menagerie/robotis_open_manipulator_x/scene.xml")# the static discription 
+data = mujoco.MjData(model)# the live data
 
 # Joint names for printing
 joint_names = ["Joint1 (Base)", "Joint2 (Shoulder)", "Joint3 (Elbow)", "Joint4 (Wrist)", "Gripper"]
@@ -50,17 +49,17 @@ with mujoco.viewer.launch_passive(model, data) as viewer:
     # Let the robot settle at home position
     print("\n>>> Starting at HOME position...")
     for _ in range(500):
-        mujoco.mj_step(model, data)
-        viewer.sync()
-        time.sleep(model.opt.timestep)
+        mujoco.mj_step(model, data)# advance the physic by just one step
+        viewer.sync()# update the visual window
+        time.sleep(model.opt.timestep)#wait so it runs at real time
 
     # Cycle through each joint
     for demo in demos:
-        joint_idx = demo["joint"]
+        joint_idx = demo["joint"]# to extract the joint name 
         
         for target in demo["targets"]:
             # Set the target position
-            data.ctrl[joint_idx] = target
+            data.ctrl[joint_idx] = target# the actual code to move the robot to the requried space
             print(f"\n>>> {demo['name']} -> target: {target:.3f}")
             
             # Simulate for 2 seconds to let it reach the target
