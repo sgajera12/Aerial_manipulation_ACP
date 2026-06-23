@@ -1,7 +1,5 @@
 """
 Velocity Control for OpenManipulator-X in MuJoCo
-=================================================
-
 Architecture:
     Your controller (outer loop) computes desired velocity:
         q̇_cmd = Kp * (q_d - q)
@@ -88,13 +86,13 @@ class VelocityController:
             
             vel_cmd += self.Ki * self.error_integral # Kp * error
         
-        # Clamp velocity to motor limits
-        vel_cmd = np.clip(vel_cmd, -self.vel_limit, self.vel_limit)
+        # Clampng velocity to motor limits then just the final value and we pass
+        vel_cmd = np.clip(vel_cmd,-self.vel_limit,self.vel_limit)
         
         return vel_cmd, e
 
 
-def run_pose_regulation(model, data, controller, q_target, duration=10.0):
+def run_pose_regulation(model, data, controller, q_target, duration=30.0):
     """Pose regulation using velocity control."""
     print("TASK POSE REGULATION (Velocity Control)")
     print(f"Target: {q_target[:4]}")
@@ -105,7 +103,7 @@ def run_pose_regulation(model, data, controller, q_target, duration=10.0):
     
     # Logging
     times, positions, errors, vel_cmds = [], [], [], []
-    
+
     with mujoco.viewer.launch_passive(model, data) as viewer:
         for i in range(n_steps):
             if not viewer.is_running():
@@ -166,7 +164,7 @@ def run_trajectory_tracking(model, data, controller, duration=20.0):
             
             t = data.time
             
-            # Desired trajectory
+            # Desired trajectory teh sinusoidal
             q_d = midpoints + amplitudes * np.sin(omega * t)
             qd_d = amplitudes * omega * np.cos(omega * t)
             
@@ -286,7 +284,7 @@ if __name__ == "__main__":
     # Ki = integral gain to eliminate steady-state error
     # vel_limit = max velocity in rad/s (Dynamixel XM430 max is ~4.8 rad/s)
     Kp = np.array([5.0, 5.0, 5.0, 5.0])
-    Ki = np.array([0.5, 0.5, 0.5, 0.5])
+    Ki = np.array([0.0, 0.0, 0.0, 0.0])
     
     controller = VelocityController(n_joints=4, Kp=Kp, Ki=Ki, vel_limit=4.8)
     
@@ -299,7 +297,7 @@ if __name__ == "__main__":
     plot_pose_regulation(times, pos, err, vcmd, q_target)
     
     #2: Trajectory Tracking
-    input("\nPress Enter to start trajectory tracking...")
+    input("\nPress Enter to start trajectory tracking:")
     
     mujoco.mj_resetData(model, data)
     data.qpos[:4] = [0.30, -0.20, 0.25, 0.10]
